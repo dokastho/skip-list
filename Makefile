@@ -5,7 +5,7 @@ SOURCES     := $(filter-out $(TESTSOURCES), $(SOURCES))
 PERF_FILE = perf.data*
 PATH := /usr/um/gcc-6.2.0/bin:$(PATH)
 WRAP = wrap.tar.gz
-EXECUTABLE = hash
+EXECUTABLE = skiplist
 
 WRAPFILES=$(filter-out $(TESTSOURCES), \
                    $(wildcard Makefile *.h *.hpp *.cpp test*.txt))
