@@ -23,18 +23,11 @@ class skip_list {
     }
 
     void insert(const T& datum) {
-        for (size_t row = 0; row < items.size(); row++)
+        if (find(datum))
         {
-            for (size_t col = 0; col < items[row].size(); col++)
-            {
-                if (datum > )
-                {
-                    
-                }
-                
-            }
-            
+            return;
         }
+        
         
     }
 
@@ -42,8 +35,18 @@ class skip_list {
 
     }
 
-    T& find(const T& datum) {
-
+    bool find(const T& datum) {
+        for (size_t row = 0; row < items.size(); row++)
+        {
+            for (size_t col = 0; col < pow(2,row); col++)
+            {
+                if (items[row][col] == datum)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 };
 
