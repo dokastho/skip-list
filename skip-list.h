@@ -16,8 +16,9 @@ class skip_list {
         int* down;
         int* up;
     };
-    node* head = nullptr,current = head;
-    size_t numRows = 0,numNodes = 0;
+    node* head = nullptr;
+    node* current = head;
+    int numRows = 0,numNodes = 0;
 
     void copy_row(node* end) {
         node* newEnd = new node;
@@ -70,6 +71,7 @@ class skip_list {
         {
             return;
         }
+        numNodes++;
         insert(newDatum,current);
     }
 
@@ -79,8 +81,7 @@ class skip_list {
             //insert the node to the right if bottom row has space
             if (numNodes != pow(2,numRows + 1) - 1)
             {
-                insert_between(current);
-                numNodes++;
+                insert_between(newDatum,current);
             }
             
             else if (current->down == nullptr)
@@ -91,7 +92,6 @@ class skip_list {
                     end = end->down;
                 }
                 copy_row(end);
-                numRows++;
             }
             
             current = current->down;
@@ -106,7 +106,6 @@ class skip_list {
         else {
             // insert in between two nodes
             insert_between(current);
-            numNodes++;
         }
     }
 
@@ -115,6 +114,7 @@ class skip_list {
         {
             return;
         }
+        numNodes--;
         erase();
         
     }
@@ -158,6 +158,10 @@ class skip_list {
         }
         
         return true;
+    }
+
+    size_t size() {
+        return numNodes;
     }
 };
 
