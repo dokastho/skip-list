@@ -40,24 +40,24 @@ class skip_list {
         if (rand() % 2 == 0)
         {
             node* newDown = n;
-            T val = n->datum;
+            T newDatum = n->datum;
             n = n->prev;
             while (!n->up)
             {
                 n = n->prev;
             }
-            insert_between(val,n);
+            insert_between(newDatum,n);
             n->down = newDown;
             n->newDown->up = n;
         }
         
     }
 
-    void insert_between(T& val, node* n) {
+    void insert_between(T& newDatum, node* n) {
         node* toInsert = new node;
         toInsert->prev = n;
         toInsert->next = n->next;
-        toInsert->datum = val;
+        toInsert->datum = newDatum;
 
         n->next = toInsert;
         toInsert->next->prev = toInsert;
@@ -98,7 +98,7 @@ class skip_list {
             insert(newDatum);
         }
         
-        else if (abs(newDatum) > abs(current->datum)) // operator is wrong, make custom comparator that compares using abs val
+        else if (abs(newDatum) > abs(current->datum)) // operator is wrong, make custom comparator that compares using abs newDatum
         {
             current = current->next;
             insert(newDatum);
@@ -110,14 +110,38 @@ class skip_list {
         }
     }
 
-    void erase(const T& datum) {
-
+    void erase_helper(const T& newDatum) {
+        if (!find(newDatum))
+        {
+            return;
+        }
+        erase();
+        
     }
 
-    bool find(const T& val) {
-        while (val != current->datum)
+    void erase() {
+        current->prev->next = current->next;
+        if (current->next)
         {
-            if (val > current->datum)
+            current->next->prev = current->prev;
+        }
+        if (current->up)
+        {
+            current = current->up;
+            delete current->down;
+            current->down = nullptr;
+            erase();
+        }
+        else {
+            delete current;
+            current = nullptr;
+        }
+    }
+
+    bool find(const T& newDatum) {
+        while (newDatum != current->datum)
+        {
+            if (abs(newDatum) > abs(current->datum))
             {
                 if (current->next)
                 {
