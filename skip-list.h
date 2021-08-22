@@ -11,12 +11,12 @@ template<typename T>
 class skip_list {
     struct node {
         T datum;
-        int* prev;
-        int* next;
-        int* down;
-        int* up;
+        node* prev;
+        node* next;
+        node* down;
+        node* up;
     };
-    const bool diff_comp(T lhs, T rhs) {
+    bool diff_comp(T lhs, T rhs) {
         return abs(lhs - head->datum) > abs(rhs - head->datum);
     }
     node* head = nullptr;
@@ -57,7 +57,7 @@ class skip_list {
         
     }
 
-    void insert_between(T& newDatum, node* n) {
+    void insert_between(const T& newDatum, node* n) {
         node* toInsert = new node;
         toInsert->prev = n;
         toInsert->next = n->next;
@@ -108,7 +108,7 @@ class skip_list {
         }
         else {
             // insert in between two nodes
-            insert_between(current);
+            insert_between(newDatum,current);
         }
     }
 
