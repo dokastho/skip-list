@@ -20,7 +20,7 @@ class skip_list {
         return abs(lhs - head->datum) > abs(rhs - head->datum);
     }
     node* head = nullptr;
-    node* current = head;
+    node* current;
     int numRows = 0,numNodes = 0;
 
     void copy_row(node* end) {
@@ -69,16 +69,25 @@ class skip_list {
 
     public:
 
-    void insert_helper(const T& newDatum) {
+    void insert(const T& newDatum) {
+        if (head == nullptr)
+        {
+            head = new node;
+            head->datum = newDatum;
+            current = head;
+            numNodes++;
+            return;
+        }
         if (find(newDatum))
         {
             return;
         }
+        
         numNodes++;
-        insert(newDatum,current);
+        insert_helper(newDatum);
     }
 
-    void insert(const T& newDatum) {
+    void insert_helper(const T& newDatum) {
         if (current->next == nullptr)
         {
             //insert the node to the right if bottom row has space
@@ -98,13 +107,13 @@ class skip_list {
             }
             
             current = current->down;
-            insert(newDatum);
+            insert_helper(newDatum);
         }
         
         else if (diff_comp(newDatum,current->datum)) // operator is wrong, make custom comparator that compares using abs newDatum
         {
             current = current->next;
-            insert(newDatum);
+            insert_helper(newDatum);
         }
         else {
             // insert in between two nodes
@@ -112,7 +121,12 @@ class skip_list {
         }
     }
 
-    void erase_helper(const T& newDatum) {
+    void erase(const T& newDatum) {
+        if (head == nullptr)
+        {
+            return;
+        }
+        
         if (!find(newDatum))
         {
             return;
@@ -122,7 +136,7 @@ class skip_list {
         
     }
 
-    void erase() {
+    void erase_helper() {
         current->prev->next = current->next;
         if (current->next)
         {
@@ -133,7 +147,7 @@ class skip_list {
             current = current->up;
             delete current->down;
             current->down = nullptr;
-            erase();
+            erase_helper();
         }
         else {
             delete current;
