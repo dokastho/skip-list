@@ -16,6 +16,9 @@ class skip_list {
         int* down;
         int* up;
     };
+    const bool diff_comp(T lhs, T rhs) {
+        return abs(lhs - head->datum) > abs(rhs - head->datum);
+    }
     node* head = nullptr;
     node* current = head;
     int numRows = 0,numNodes = 0;
@@ -98,7 +101,7 @@ class skip_list {
             insert(newDatum);
         }
         
-        else if (abs(newDatum) > abs(current->datum)) // operator is wrong, make custom comparator that compares using abs newDatum
+        else if (diff_comp(newDatum,current->datum)) // operator is wrong, make custom comparator that compares using abs newDatum
         {
             current = current->next;
             insert(newDatum);
@@ -141,7 +144,7 @@ class skip_list {
     bool find(const T& newDatum) {
         while (newDatum != current->datum)
         {
-            if (abs(newDatum) > abs(current->datum))
+            if (diff_comp(newDatum,current->datum))
             {
                 if (current->next)
                 {
