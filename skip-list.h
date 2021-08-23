@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <limits>
 
 using namespace std;
 
@@ -16,11 +17,7 @@ class skip_list {
         node* down;
         node* up;
     };
-    bool diff_comp(T lhs, T rhs) {
-        return abs(lhs - head->datum) > abs(rhs - head->datum);
-    }
     node* head = nullptr;
-    node* current;
     int numRows = 0,numNodes = 0;
 
     void copy_row(node* end) {
@@ -65,116 +62,105 @@ class skip_list {
 
         n->next = toInsert;
         toInsert->next->prev = toInsert;
+        build_up(toInsert);
     }
 
     public:
+
+    skip_list() {
+        node* dummy = new node;
+        double small = -1 * INFINITY;
+        dummy->datum = small;
+    }
 
     void insert(const T& newDatum) {
         if (head == nullptr)
         {
             head = new node;
             head->datum = newDatum;
-            current = head;
-            numNodes++;
-            return;
         }
-        if (find(newDatum))
-        {
-            return;
-        }
-        
-        numNodes++;
-        insert_helper(newDatum);
-    }
 
-    void insert_helper(const T& newDatum) {
-        if (current->next == nullptr)
+        numNodes++;
+        node* at = find(newDatum);
+        else if (at)
         {
-            //insert the node to the right if bottom row has space
-            if (numNodes != pow(2,numRows + 1) - 1)
+            return;
+        }
+        // insert using the current location from find
+        else {
+            if (numNodes == pow(2,numRows + 1) - 1)
             {
-                insert_between(newDatum,current);
-            }
-            
-            else if (current->down == nullptr)
-            {
-                node* end = head;
-                while (end->down)
+                numRows++;
+                // move node to end of row
+                node* end = at;
+                while (end->prev;)
                 {
-                    end = end->down;
+                    end = end->prev;
                 }
+                
                 copy_row(end);
+                at = at->down;
             }
             
-            current = current->down;
-            insert_helper(newDatum);
+            insert_between(newDatum, at);
         }
         
-        else if (diff_comp(newDatum,current->datum)) // operator is wrong, make custom comparator that compares using abs newDatum
-        {
-            current = current->next;
-            insert_helper(newDatum);
-        }
-        else {
-            // insert in between two nodes
-            insert_between(newDatum,current);
-        }
+        return;
     }
 
     void erase(const T& newDatum) {
-        if (head == nullptr)
+        node* at = find(newDatum);
+        else if (!at)
         {
             return;
         }
-        
-        if (!find(newDatum))
-        {
-            return;
-        }
+
         numNodes--;
-        erase();
+        // delete the node
+        if (at->prev)
+        {
+            at->prev->next = at->next;
+        }
+        if (at->next)
+        {
+            at->next->prev = at->prev;
+        }
+        // delete up
+        while (at)
+        {
+            node* nextUp = at->up;
+            delete at;
+            at = nextUp;
+        }
+    }
+
+    node* find(const T& newDatum) {
+        node* readHead = head;
+        if (!head)
+        {
+            return nullptr;
+        }
         
-    }
-
-    void erase_helper() {
-        current->prev->next = current->next;
-        if (current->next)
+        while (newDatum != readHead->datum)
         {
-            current->next->prev = current->prev;
-        }
-        if (current->up)
-        {
-            current = current->up;
-            delete current->down;
-            current->down = nullptr;
-            erase_helper();
-        }
-        else {
-            delete current;
-            current = nullptr;
-        }
-    }
-
-    bool find(const T& newDatum) {
-        while (newDatum != current->datum)
-        {
-            if (diff_comp(newDatum,current->datum))
+            if (newDatum > readHead->datum)
             {
-                if (current->next)
+                if (readHead->next)
                 {
-                    current = current->next;
+                    readHead = readHead->next;
                 }
-                else if (current->down)
+                else if (readHead->down)
                 {
-                    current = current->down;
+                    readHead = readHead->down;
                 }
             }
+            
             else {
-                return false;
+                return nullptr;
             }
         }
         
-        return true;
+        return readHead;
     }
 
     size_t size() {
