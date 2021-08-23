@@ -17,8 +17,8 @@ class skip_list {
         node* down;
         node* up;
     };
-    node* head = nullptr;
-    int numRows = 0,numNodes = 0;
+    node* head;
+    int numRows,numNodes;
 
     void copy_row(node* end) {
         node* newEnd = new node;
@@ -49,7 +49,7 @@ class skip_list {
             }
             insert_between(newDatum,n);
             n->down = newDown;
-            n->newDown->up = n;
+            newDown->up = n;
         }
         
     }
@@ -61,7 +61,11 @@ class skip_list {
         toInsert->datum = newDatum;
 
         n->next = toInsert;
-        toInsert->next->prev = toInsert;
+        if (toInsert->next)
+        {
+            toInsert->next->prev = toInsert;
+        }
+        
         build_up(toInsert);
     }
 
@@ -69,31 +73,27 @@ class skip_list {
 
     skip_list() {
         node* dummy = new node;
-        double small = -1 * INFINITY;
+        T small = T(-1 * INFINITY);
         dummy->datum = small;
+        head = dummy;
+        numNodes = 0;
+        numRows = 0;
     }
 
     void insert(const T& newDatum) {
-        if (head == nullptr)
-        {
-            head = new node;
-            head->datum = newDatum;
-        }
-
-        numNodes++;
         node* at = find(newDatum);
-        else if (at)
+        if (!at)
         {
             return;
         }
         // insert using the current location from find
         else {
-            if (numNodes == pow(2,numRows + 1) - 1)
+            if (numNodes == (pow(2,numRows + 1) - 1))
             {
                 numRows++;
                 // move node to end of row
                 node* end = at;
-                while (end->prev;)
+                while (end->prev)
                 {
                     end = end->prev;
                 }
@@ -104,13 +104,13 @@ class skip_list {
             
             insert_between(newDatum, at);
         }
-        
+        numNodes++;
         return;
     }
 
     void erase(const T& newDatum) {
         node* at = find(newDatum);
-        else if (!at)
+        if (!at)
         {
             return;
         }
@@ -136,11 +136,9 @@ class skip_list {
 
     node* find(const T& newDatum) {
         node* readHead = head;
-        if (!head)
-        {
-            return nullptr;
-        }
-        
+        // somewhat counterintuitively, this function returns nullptr
+        // if the item is found, else returns a pointer to the left of 
+        // where the new node will go
         while (newDatum != readHead->datum)
         {
             if (newDatum > readHead->datum)
@@ -153,14 +151,16 @@ class skip_list {
                 {
                     readHead = readHead->down;
                 }
+                else {
+                    return readHead;
+                }
             }
-            
             else {
-                return nullptr;
+                return readHead->prev; // might segfault
             }
         }
         
-        return readHead;
+        return nullptr;
     }
 
     size_t size() {
