@@ -28,8 +28,11 @@ class skip_list {
             newEnd->up = end;
             newEnd->datum = end->datum;
 
-            newEnd->next = new node;
-            newEnd->next->prev = newEnd;
+            if (end->next)
+            {
+                newEnd->next = new node;
+                newEnd->next->prev = newEnd;
+            }
 
             newEnd = newEnd->next;
             end = end->next;
@@ -40,16 +43,23 @@ class skip_list {
     void build_up(node* n) {
         if (rand() % 2 == 0)
         {
-            node* newDown = n;
+            node* upper = n->prev;
             T newDatum = n->datum;
-            n = n->prev;
-            while (!n->up)
+            while (!upper->up)
             {
-                n = n->prev;
+                if (upper->prev)
+                {
+                    upper = upper->prev;
+                }
+                else
+                {
+                    return;
+                }
             }
-            insert_between(newDatum,n);
-            n->down = newDown;
-            newDown->up = n;
+            upper = upper->up;
+            insert_between(newDatum,upper);
+            n->up = upper->next;
+            upper->next->down = n;
         }
         
     }
@@ -82,7 +92,7 @@ class skip_list {
 
     void insert(const T& newDatum) {
         node* at = find(newDatum);
-        if (!at)
+        if (at->datum == newDatum)
         {
             return;
         }
@@ -110,57 +120,66 @@ class skip_list {
 
     void erase(const T& newDatum) {
         node* at = find(newDatum);
-        if (!at)
+        if (at->datum != newDatum)
         {
             return;
         }
 
         numNodes--;
-        // delete the node
-        if (at->prev)
-        {
-            at->prev->next = at->next;
-        }
-        if (at->next)
-        {
-            at->next->prev = at->prev;
-        }
-        // delete up
+        // delete down
         while (at)
         {
-            node* nextUp = at->up;
-            delete at;
-            at = nextUp;
+            if (at->up)
+            {
+                delete at->up;
+            }
+            
+            // delete the node
+            if (at->prev)
+            {
+                at->prev->next = at->next;
+            }
+            if (at->next)
+            {
+                at->next->prev = at->prev;
+            }
+            at = at->down;
         }
     }
 
     node* find(const T& newDatum) {
         node* readHead = head;
-        // somewhat counterintuitively, this function returns nullptr
-        // if the item is found, else returns a pointer to the left of 
-        // where the new node will go
         while (newDatum != readHead->datum)
         {
-            if (newDatum > readHead->datum)
+            if (readHead->next)
             {
-                if (readHead->next)
+                if (newDatum >= readHead->next->datum)
                 {
                     readHead = readHead->next;
+                    continue;
                 }
                 else if (readHead->down)
                 {
                     readHead = readHead->down;
+                    continue;
                 }
                 else {
-                    return readHead;
+                    break;
                 }
             }
             else {
-                return readHead->prev; // might segfault
+                if (readHead->down)
+                {
+                    readHead = readHead->down;
+                    continue;
+                }
+                else {
+                    break;
+                }
             }
         }
         
-        return nullptr;
+        return readHead;
     }
 
     size_t size() {
